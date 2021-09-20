@@ -21,6 +21,7 @@ const upload = multer({ storage: storage });
 // .single('avatar');
 
 app.set('view engine', 'ejs');
+app.use(express.static('public'));
 
 //routes
 app.get('/', (req, res) => {
@@ -39,6 +40,7 @@ app.post('/upload', upload.single('avatar'), async (req, res) => {
   } = await worker.recognize(req.file.path);
 
   res.send(text);
+  // res.redirect('/download');
 
   await worker.terminate();
 });
