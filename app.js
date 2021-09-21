@@ -2,10 +2,13 @@ const express = require('express');
 const app = express();
 const fs = require('fs');
 const multer = require('multer');
-const { createWorker } = require('tesseract.js');
+const { createWorker, setLogging } = require('tesseract.js');
+
+setLogging(true);
 
 const worker = createWorker({
-  logger: m => console.log(m)
+  logger: m => console.log(m),
+  errorHandler: err => console.error(err)
 });
 
 const storage = multer.diskStorage({
@@ -29,20 +32,54 @@ app.get('/', (req, res) => {
 });
 
 app.post('/upload', upload.single('avatar'), async (req, res) => {
-  //   console.log(req.file);
-  //   console.log(req.body);
+  /* 
+     //Check and confirm that we are receiving a file.
+     //Check if file is an image
+      // read the file to get file type
+    * If file is not an image convert it to an image - bmp, jpg, png, pbm
+    * Then run file in Tesseract
+  */
 
+  let userFile;
+  let image = {};
+
+  if (req.file == null || req.file == undefined) {
+    console.log('Error: No file uploaded. Please select a file and try again.');
+  } else {
+    userFile = req.file;
+  }
+
+  switch (userFile.mimetype) {
+    case 'image/jpeg':
+      console.log(`This is an image == FileType:${userFile.mimetype}`);
+      break;
+    case 'image/png':
+      console.log(`This is an image == FileType:${userFile.mimetype}`);
+      break;
+    default:
+      console.log(
+        `This is not a not an image == FileType:${userFile.mimetype}`
+      );
+      break;
+  }
+
+  /*
+  // ! Create a function to hold the this
   await worker.load();
   await worker.loadLanguage('eng');
   await worker.initialize('eng');
   const {
     data: { text }
-  } = await worker.recognize(req.file.path);
+  } = await worker.recognize(req.file.path); // ! File path needs to correct all the time when entering here. We also need to stick this in a try catch function.
 
-  res.send(text);
-  // res.redirect('/download');
+  // * Send the data to the front end.
+   res.send(text);
+   res.redirect('/download'); // ! Down load file to machine
 
+  // * Terminate Worker
   await worker.terminate();
+
+  */
 });
 
 // Start up server
