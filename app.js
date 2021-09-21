@@ -41,7 +41,7 @@ app.post('/upload', upload.single('avatar'), async (req, res) => {
   */
 
   let userFile;
-  let image = {};
+  let content = {};
 
   if (req.file == null || req.file == undefined) {
     console.log('Error: No file uploaded. Please select a file and try again.');
@@ -52,14 +52,41 @@ app.post('/upload', upload.single('avatar'), async (req, res) => {
   switch (userFile.mimetype) {
     case 'image/jpeg':
       console.log(`This is an image == FileType:${userFile.mimetype}`);
+      try {
+        await worker.load();
+        await worker.loadLanguage('eng');
+        await worker.initialize('eng');
+        const {
+          data: { text }
+        } = await worker.recognize(userFile.path);
+        res.send(text);
+      } catch (error) {
+        console.log(error);
+      }
       break;
     case 'image/png':
       console.log(`This is an image == FileType:${userFile.mimetype}`);
+      try {
+        await worker.load();
+        await worker.loadLanguage('eng');
+        await worker.initialize('eng');
+        const {
+          data: { text }
+        } = await worker.recognize(userFile.path);
+        res.send(text);
+      } catch (error) {
+        console.log(error);
+      }
       break;
     default:
       console.log(
-        `This is not a not an image == FileType:${userFile.mimetype}`
+        `This is not a not an image == FileType:${userFile.mimetype}` // ! I need to grab any file type and covert it to an image. But I guess I'll be happey with PDF to image.
       );
+      fs.readFile(userFile.path, (err, data) => {
+        if (err) throw err;
+        console.log(data);
+        // return data;
+      });
       break;
   }
 
