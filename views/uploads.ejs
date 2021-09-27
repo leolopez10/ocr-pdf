@@ -5,13 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <title>Image to Text</title>
+    <title>Image to PDF</title>
   </head>
   <body>
-    <h1>Image To Text</h1>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-      <input type="file" name="avatar" />
-      <button type="submit">Convert</button>
-    </form>
+    <h1>Image to PDF</h1>
+    <% if (text) { %>
+    <h2><%= text %></h2>
+    <% } %>
+
+    <button type="button" onclick="location.href='/'">UploadFile</button>
   </body>
 </html>

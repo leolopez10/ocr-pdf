@@ -3,6 +3,7 @@ const app = express();
 const fs = require('fs');
 const multer = require('multer');
 const { createWorker, setLogging } = require('tesseract.js');
+const ejs = require('ejs');
 
 setLogging(true);
 
@@ -23,6 +24,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 // .single('avatar');
 
+// Setting views and styles
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
@@ -51,19 +53,6 @@ app.post('/upload', upload.single('avatar'), async (req, res) => {
 
   switch (userFile.mimetype) {
     case 'image/jpeg':
-      console.log(`This is an image == FileType:${userFile.mimetype}`);
-      try {
-        await worker.load();
-        await worker.loadLanguage('eng');
-        await worker.initialize('eng');
-        const {
-          data: { text }
-        } = await worker.recognize(userFile.path);
-        res.send(text);
-      } catch (error) {
-        console.log(error);
-      }
-      break;
     case 'image/png':
       console.log(`This is an image == FileType:${userFile.mimetype}`);
       try {
@@ -73,11 +62,45 @@ app.post('/upload', upload.single('avatar'), async (req, res) => {
         const {
           data: { text }
         } = await worker.recognize(userFile.path);
-        res.send(text);
+        // res.send(text); // send a view with the text and a back button
+        console.log(text);
+
+        res.render('uploads', { text: text });
       } catch (error) {
         console.log(error);
       }
       break;
+
+    case 'application/pdf':
+      console.log(`This is an image == FileType:${userFile.mimetype}`);
+
+      // res.send(userFile.path);
+      console.log(userFile);
+
+      // let buf = fs.readFileSync(userFile.path);
+
+      // console.log(buf);
+
+      // gm(buf, 'image.jpg')
+      //   .noise('laplacian')
+      //   .write(`./uploads/WEZK8.jpg`, function (err) {
+      //     if (err) return console.log(err);
+      //     console.log('Created an image from a Buffer!');
+      //   });
+
+      // try {
+      //   await worker.load();
+      //   await worker.loadLanguage('eng');
+      //   await worker.initialize('eng');
+      //   const {
+      //     data: { text }
+      //   } = await worker.recognize(userFile.path);
+      //   res.send(text);
+      // } catch (error) {
+      //   console.log(error);
+      // }
+      break;
+
     default:
       console.log(
         `This is not a not an image == FileType:${userFile.mimetype}` // ! I need to grab any file type and covert it to an image. But I guess I'll be happey with PDF to image.
@@ -87,26 +110,9 @@ app.post('/upload', upload.single('avatar'), async (req, res) => {
         console.log(data);
         // return data;
       });
+
       break;
   }
-
-  /*
-  // ! Create a function to hold the this
-  await worker.load();
-  await worker.loadLanguage('eng');
-  await worker.initialize('eng');
-  const {
-    data: { text }
-  } = await worker.recognize(req.file.path); // ! File path needs to correct all the time when entering here. We also need to stick this in a try catch function.
-
-  // * Send the data to the front end.
-   res.send(text);
-   res.redirect('/download'); // ! Down load file to machine
-
-  // * Terminate Worker
-  await worker.terminate();
-
-  */
 });
 
 // Start up server
